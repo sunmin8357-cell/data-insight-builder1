@@ -1,0 +1,119 @@
+/* Data Insight Builder Custom Styles */
+
+/* 탭 전환 스타일 */
+.tab-btn.active {
+    background-color: #ffffff;
+    color: #2563eb;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+/* 마크다운 결과 컨테이너 스타일 */
+#insight-markdown-body h1,
+#custom-ai-output h1 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #0f172a;
+    margin-top: 1.25rem;
+    margin-bottom: 0.75rem;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 0.5rem;
+}
+
+#insight-markdown-body h2,
+#custom-ai-output h2 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+#insight-markdown-body h3,
+#custom-ai-output h3 {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #334155;
+    margin-top: 1rem;
+    margin-bottom: 0.4rem;
+}
+
+#insight-markdown-body ul,
+#custom-ai-output ul {
+    list-style-type: disc;
+    padding-left: 1.5rem;
+    margin-top: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+
+#insight-markdown-body li,
+#custom-ai-output li {
+    margin-bottom: 0.25rem;
+}
+
+#insight-markdown-body p,
+#custom-ai-output p {
+    margin-bottom: 0.75rem;
+    line-height: 1.7;
+}
+
+#insight-markdown-body blockquote,
+#custom-ai-output blockquote {
+    border-left: 4px solid #3b82f6;
+    padding-left: 1rem;
+    color: #475569;
+    background-color: #eff6ff;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    border-radius: 0 0.5rem 0.5rem 0;
+    margin: 1rem 0;
+}
+
+#insight-markdown-body table,
+#custom-ai-output table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+    font-size: 0.85rem;
+}
+
+#insight-markdown-body th,
+#insight-markdown-body td,
+#custom-ai-output th,
+#custom-ai-output td {
+    border: 1px solid #cbd5e1;
+    padding: 0.5rem 0.75rem;
+}
+
+#insight-markdown-body th,
+#custom-ai-output th {
+    background-color: #f1f5f9;
+    font-weight: 600;
+}
+
+/* 태그 배지 */
+.country-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.25rem 0.6rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background-color: #e0f2fe;
+    color: #0369a1;
+    border: 1px solid #bae6fd;
+}
+
+.country-tag button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    padding: 0.1rem;
+    color: #0369a1;
+}
+
+.country-tag button:hover {
+    background-color: #bae6fd;
+    color: #0c4a6e;
+}
