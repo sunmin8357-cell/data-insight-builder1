@@ -11,12 +11,153 @@ let lastRunResult = null;
 // Initialize on DOMContentLoaded
 document.addEventListener("DOMContentLoaded", () => {
   console.log("[PAGE] 페이지 로드 완료");
+  setupPinLock();
   checkServerHealth();
   setupUploadEvents();
   setupNlQueryEvents();
   setupModeButtons();
   setupChatEvents();
 });
+
+/**
+ * 0. 4-Digit PIN Security Lock
+ */
+function setupPinLock() {
+  const PIN_STORAGE_KEY = "data_insight_user_pin";
+  const AUTH_STORAGE_KEY = "data_insight_is_authed";
+  const DEFAULT_PIN = "1234";
+
+  const lockScreen = document.getElementById("pinLockScreen");
+  const dotsContainer = document.getElementById("pinDots");
+  const errorMsg = document.getElementById("pinErrorMsg");
+  const btnClear = document.getElementById("btnPinClear");
+  const btnDelete = document.getElementById("btnPinDelete");
+  const btnChangePin = document.getElementById("btnChangePin");
+  const keys = document.querySelectorAll(".pin-keypad .key-btn[data-key]");
+
+  let currentInput = "";
+
+  // Check if session is already authenticated (sessionStorage so it asks per visit)
+  if (sessionStorage.getItem(AUTH_STORAGE_KEY) === "true") {
+    if (lockScreen) lockScreen.classList.add("unlocked");
+  }
+
+  function getStoredPin() {
+    return localStorage.getItem(PIN_STORAGE_KEY) || DEFAULT_PIN;
+  }
+
+  function updateDots() {
+    if (!dotsContainer) return;
+    const dots = dotsContainer.querySelectorAll(".dot");
+    dots.forEach((dot, idx) => {
+      if (idx < currentInput.length) {
+        dot.classList.add("filled");
+      } else {
+        dot.classList.remove("filled");
+      }
+    });
+  }
+
+  function triggerShake() {
+    if (dotsContainer) {
+      dotsContainer.classList.add("shake");
+      setTimeout(() => dotsContainer.classList.remove("shake"), 500);
+    }
+  }
+
+  function verifyPin() {
+    const validPin = getStoredPin();
+    if (currentInput === validPin) {
+      if (errorMsg) errorMsg.textContent = "";
+      sessionStorage.setItem(AUTH_STORAGE_KEY, "true");
+      if (lockScreen) {
+        lockScreen.classList.add("fade-out");
+        setTimeout(() => {
+          lockScreen.classList.add("unlocked");
+          lockScreen.classList.remove("fade-out");
+        }, 300);
+      }
+    } else {
+      triggerShake();
+      if (errorMsg) errorMsg.textContent = "비밀번호가 올바르지 않습니다.";
+      currentInput = "";
+      updateDots();
+    }
+  }
+
+  keys.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      if (currentInput.length < 4) {
+        currentInput += btn.getAttribute("data-key");
+        updateDots();
+        if (currentInput.length === 4) {
+          setTimeout(verifyPin, 100);
+        }
+      }
+    });
+  });
+
+  if (btnDelete) {
+    btnDelete.addEventListener("click", () => {
+      if (currentInput.length > 0) {
+        currentInput = currentInput.slice(0, -1);
+        updateDots();
+        if (errorMsg) errorMsg.textContent = "";
+      }
+    });
+  }
+
+  if (btnClear) {
+    btnClear.addEventListener("click", () => {
+      currentInput = "";
+      updateDots();
+      if (errorMsg) errorMsg.textContent = "";
+    });
+  }
+
+  // Keyboard support (desktop / tablet)
+  window.addEventListener("keydown", (e) => {
+    if (lockScreen && lockScreen.classList.contains("unlocked")) return;
+    if (e.key >= "0" && e.key <= "9") {
+      if (currentInput.length < 4) {
+        currentInput += e.key;
+        updateDots();
+        if (currentInput.length === 4) {
+          setTimeout(verifyPin, 100);
+        }
+      }
+    } else if (e.key === "Backspace") {
+      if (currentInput.length > 0) {
+        currentInput = currentInput.slice(0, -1);
+        updateDots();
+        if (errorMsg) errorMsg.textContent = "";
+      }
+    } else if (e.key === "Escape") {
+      currentInput = "";
+      updateDots();
+      if (errorMsg) errorMsg.textContent = "";
+    }
+  });
+
+  // Change PIN functionality
+  if (btnChangePin) {
+    btnChangePin.addEventListener("click", () => {
+      const current = prompt("현재 4자리 비밀번호를 입력하세요:");
+      if (current === null) return;
+      if (current !== getStoredPin()) {
+        alert("현재 비밀번호가 일치하지 않습니다.");
+        return;
+      }
+      const newPin = prompt("새로운 4자리 숫자를 입력하세요:");
+      if (!newPin || newPin.length !== 4 || !/^\d{4}$/.test(newPin)) {
+        alert("비밀번호는 반드시 숫자 4자리여야 합니다.");
+        return;
+      }
+      localStorage.setItem(PIN_STORAGE_KEY, newPin);
+      alert("비밀번호가 성공적으로 변경되었습니다! (새 비밀번호: " + newPin + ")");
+    });
+  }
+}
 
 /**
  * 1. Check Server Health (/health)

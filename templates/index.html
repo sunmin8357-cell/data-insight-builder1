@@ -2,21 +2,71 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>AI Data Insight Builder</title>
+
+  <!-- PWA & Mobile Meta Tags -->
+  <link rel="manifest" href="/static/manifest.json">
+  <meta name="theme-color" content="#2563eb">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="DataInsight">
+  <link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
+  <link rel="icon" type="image/png" href="/static/favicon.png">
+
   <!-- Chart.js CDN (CDN 허용된 경량 차트 라이브러리) -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
+  <!-- PIN Code Lock Screen Modal -->
+  <div id="pinLockScreen" class="pin-lock-overlay">
+    <div class="pin-card">
+      <div class="pin-icon">
+        <img src="/static/icon-192.png" alt="App Icon" class="pin-app-logo" />
+      </div>
+      <h2>AI Data Insight Builder</h2>
+      <p class="pin-desc">보안을 위해 4자리 비밀번호를 입력해 주세요.</p>
+      
+      <div class="pin-dots" id="pinDots">
+        <span class="dot"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
+      </div>
+
+      <div class="pin-keypad">
+        <button type="button" class="key-btn" data-key="1">1</button>
+        <button type="button" class="key-btn" data-key="2">2</button>
+        <button type="button" class="key-btn" data-key="3">3</button>
+        <button type="button" class="key-btn" data-key="4">4</button>
+        <button type="button" class="key-btn" data-key="5">5</button>
+        <button type="button" class="key-btn" data-key="6">6</button>
+        <button type="button" class="key-btn" data-key="7">7</button>
+        <button type="button" class="key-btn" data-key="8">8</button>
+        <button type="button" class="key-btn" data-key="9">9</button>
+        <button type="button" class="key-btn action-btn" id="btnPinClear">초기화</button>
+        <button type="button" class="key-btn" data-key="0">0</button>
+        <button type="button" class="key-btn action-btn" id="btnPinDelete">⌫</button>
+      </div>
+
+      <div id="pinErrorMsg" class="pin-error-msg"></div>
+      <div class="pin-hint">※ 기본 비밀번호: <strong>1234</strong> (우측 상단에서 변경 가능)</div>
+    </div>
+  </div>
+
   <header class="header">
     <div class="container header-container">
       <div class="logo">
+        <img src="/static/icon-192.png" alt="Logo" class="header-logo-img" />
         <span class="logo-badge">PROMPT TO INSIGHT</span>
         <h1>AI Data Insight Builder</h1>
       </div>
-      <div id="serverStatus" class="status-indicator">
-        <span class="dot"></span> 서버 연결 확인 중...
+      <div class="header-actions">
+        <button id="btnChangePin" class="btn-sm-ghost" title="비밀번호 변경">🔒 암호 설정</button>
+        <div id="serverStatus" class="status-indicator">
+          <span class="dot"></span> 서버 연결 확인 중...
+        </div>
       </div>
     </div>
   </header>
@@ -257,10 +307,51 @@
 
   <footer class="footer">
     <div class="container">
+      <div id="pwaInstallContainer" class="pwa-install-banner hidden">
+        <span>📲 홈 화면에 앱 설치하고 전체화면으로 사용하세요!</span>
+        <button id="btnPwaInstall" class="btn btn-sm btn-primary">앱 설치하기</button>
+      </div>
       <p>AI Data Insight Builder • 교육용 데이터 분석 웹애플리케이션</p>
     </div>
   </footer>
 
   <script src="/static/app.js"></script>
+  <script>
+    // Register PWA Service Worker
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/static/sw.js')
+          .then((reg) => console.log('[PWA] ServiceWorker registered with scope:', reg.scope))
+          .catch((err) => console.warn('[PWA] ServiceWorker registration failed:', err));
+      });
+    }
+
+    // PWA Install prompt handling
+    let deferredPrompt = null;
+    const pwaContainer = document.getElementById('pwaInstallContainer');
+    const pwaBtn = document.getElementById('btnPwaInstall');
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      if (pwaContainer) pwaContainer.classList.remove('hidden');
+    });
+
+    if (pwaBtn) {
+      pwaBtn.addEventListener('click', async () => {
+        if (!deferredPrompt) return;
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        console.log('[PWA] User response to install:', outcome);
+        deferredPrompt = null;
+        if (pwaContainer) pwaContainer.classList.add('hidden');
+      });
+    }
+
+    window.addEventListener('appinstalled', () => {
+      console.log('[PWA] Application installed successfully!');
+      if (pwaContainer) pwaContainer.classList.add('hidden');
+    });
+  </script>
 </body>
 </html>
